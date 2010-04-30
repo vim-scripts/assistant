@@ -1,0 +1,11 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=2805
+
+"   To show the prototype of function or method, just press <C-h>,also upport user complete function(<C-x-u>) 
+"   Now support php and vim(zh-cn) function list.
+"   It's very easy to make your self function list, see the file in assistant dir, the help file formate is like 'key' => 'value'
+
+"   <C-h>快捷键显示当前位置函数的原型，支持PHP、Vim脚本
+"   <C-x-u>补全当前位置函数
+"   若喜欢用netbeans或者eclipse的补全快捷键，可以将=config=中的键映射启用。
+"   需要添加支持更多的文件，只要将符合 键=>值 形式的字典文件
+"   以 补全文件后缀名.txt 保存到 assistant 目录下即可，1.35版之后会自动载入。
