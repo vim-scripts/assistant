@@ -4,7 +4,7 @@
 "          Path:  ~/.vim/plugin
 "        Author:  A-yu
 "      Modifier:  A-yu
-"      Modified:  2010-04-30 22:18:36  
+"      Modified:  2010-08-05 22:46:25  
 "       License:  Public Domain
 "   Description:  Show the prototype of function
 "
@@ -14,13 +14,18 @@
 if exists("g:loaded_assistant")
     finish
 endif
+let g:loaded_assistant = "Version 1.30"
 
-let g:loaded_assistant = "Version 1.25"
+" Exit if user doesn't need this plugin
+if exists("g:DisableAcomplete") && g:DisableAcomplete != 0
+    finish
+endif
 
 " ================================== Config ===========================================
+" Defined user complete function (<C-x-u>)
 nmap <silent> <unique> <C-h> :call <SID>Help()<Cr>
-let g:DisableAcomplete = 0
 
+" Defined complete file types
 let s:aType = {
             \'php':'php', 'phps':'php', 'phtml':'php',
             \'vim':'vim', 'vimrc':'vim'
@@ -115,43 +120,45 @@ function s:Help()
     endif
 endf
 
-" Defined user complete function (<C-x-u>)
-if !exists("g:DisableAcomplete") || g:DisableAcomplete == 0
-    function Acomplete(start, base)
-        if a:start
-            let line = getline('.')
-            let start = col('.') - 1
-            while start > 0 && line[start - 1] =~ s:aChar
-                let start -= 1
-            endwhile
-            return start
-        else
-            let fileType = s:GetFileType()
-            if !s:Init(fileType) || a:base =~ '^\s*$'
-                return []
-            endif
-
-            let key = a:base
-            let len = len(s:aDict[s:aType[fileType]]) - 1
-            let keys = keys(s:aDict[s:aType[fileType]])
-            let vals = values(s:aDict[s:aType[fileType]])
-
-            let results = []
-            while len >= 0
-                if keys[len] =~ '^'.key.s:aChar.'*$'
-                    call add(results, {'word':keys[len], 'menu':vals[len]})
-                endif
-                let len -= 1
-            endw
-
-            return sort(results)
+function Acomplete(start, base)
+    if a:start
+        let line = getline('.')
+        let start = col('.') - 1
+        while start > 0 && line[start - 1] =~ s:aChar
+            let start -= 1
+        endwhile
+        return start
+    else
+        let fileType = s:GetFileType()
+        if !s:Init(fileType) || a:base =~ '^\s*$'
+            return []
         endif
-    endf
 
-    " Set user complete function
+        let key = a:base
+        let len = len(s:aDict[s:aType[fileType]]) - 1
+        let keys = keys(s:aDict[s:aType[fileType]])
+        let vals = values(s:aDict[s:aType[fileType]])
+
+        let results = []
+        while len >= 0
+            if keys[len] =~ '^'.key.s:aChar.'*$'
+                call add(results, {'word':keys[len], 'menu':vals[len]})
+            endif
+            let len -= 1
+        endw
+
+        return sort(results)
+    endif
+endf
+
+" Set user complete function
+function s:SetCompletefunc()
     if has_key(s:aType, s:GetFileType())
         set completefunc=Acomplete
     endif
-endif
+endf
+autocmd BufEnter,BufRead * :call s:SetCompletefunc()
+autocmd Filetype * :call s:SetCompletefunc()
+
 " vim:ft=vim:ff=unix:tabstop=4:shiftwidth=4:softtabstop=4:expandtab
 " End of file : assistant.vim
