@@ -4,7 +4,7 @@
 "          Path:  ~/.vim/plugin
 "        Author:  A-yu
 "      Modifier:  A-yu
-"      Modified:  2010-08-05 22:46:25  
+"      Modified:  2010-08-19 17:33:09  
 "       License:  Public Domain
 "   Description:  Show the prototype of function
 "
@@ -14,7 +14,7 @@
 if exists("g:loaded_assistant")
     finish
 endif
-let g:loaded_assistant = "Version 1.30"
+let g:loaded_assistant = "Version 1.35"
 
 " Exit if user doesn't need this plugin
 if exists("g:DisableAcomplete") && g:DisableAcomplete != 0
@@ -22,7 +22,16 @@ if exists("g:DisableAcomplete") && g:DisableAcomplete != 0
 endif
 
 " ================================== Config ===========================================
-" Defined user complete function (<C-x-u>)
+" Defined user complete function, default is <C-x-u>
+"
+" Mapping for Eclipse user
+" imap <silent> <unique> <A-/> <C-x><C-u>
+" nmap <silent> <unique> <A-/> :call <SID>Help()<Cr>
+"
+" Mapping for Netbeans user
+" imap <silent> <unique> <C-\> <C-x><C-u>
+" nmap <silent> <unique> <C-\> :call <SID>Help()<Cr>
+
 nmap <silent> <unique> <C-h> :call <SID>Help()<Cr>
 
 " Defined complete file types
@@ -153,7 +162,14 @@ endf
 
 " Set user complete function
 function s:SetCompletefunc()
-    if has_key(s:aType, s:GetFileType())
+    let type = s:GetFileType()
+    if !has_key(s:aType, type)
+        if filereadable(expand(substitute(globpath(&rtp, 'plugin/assistant/'), "\n", ',', 'g').type.'.txt'))
+            let s:aType[type] = type
+        endif
+    endif
+
+    if has_key(s:aType, type)
         set completefunc=Acomplete
     endif
 endf
