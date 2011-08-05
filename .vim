@@ -32,7 +32,7 @@ endif
 " imap <silent> <unique> <C-\> <C-x><C-u>
 " nmap <silent> <unique> <C-\> :call <SID>Help()<Cr>
 
-nmap <silent> <unique> <C-h> :call <SID>Help()<Cr>
+nmap <silent> <unique> <C-k> :call <SID>Help()<Cr>
 
 " Defined complete file types
 let s:aType = {
