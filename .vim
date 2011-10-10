@@ -4,7 +4,7 @@
 "          Path:  ~/.vim/plugin
 "        Author:  A-yu
 "      Modifier:  A-yu
-"      Modified:  2010-08-19 17:33:09  
+"      Modified:  2011-10-11 00:42:25  
 "       License:  Public Domain
 "   Description:  Show the prototype of function
 "
@@ -14,7 +14,7 @@
 if exists("g:loaded_assistant")
     finish
 endif
-let g:loaded_assistant = "Version 1.35"
+let g:loaded_assistant = "Version 1.40"
 
 " Exit if user doesn't need this plugin
 if exists("g:DisableAcomplete") && g:DisableAcomplete != 0
@@ -36,7 +36,7 @@ nmap <silent> <unique> <C-k> :call <SID>Help()<Cr>
 
 " Defined complete file types
 let s:aType = {
-            \'php':'php', 'phps':'php', 'phtml':'php',
+            \'phps':'php', 'phtml':'php',
             \'vim':'vim', 'vimrc':'vim'
             \}
 " ================================== Config End =======================================
@@ -60,13 +60,13 @@ function s:Init(fileType)
 
     if !has_key(s:aUrl, s:aType[a:fileType])
         " Thanks for Caglar Toklu
-        let s:aUrl[s:aType[a:fileType]] = expand(substitute(globpath(&rtp, 'plugin/assistant/'), "\n", ',', 'g').s:aType[a:fileType].'.txt')
+        let s:aUrl[s:aType[a:fileType]] = expand(substitute(globpath(&rtp, 'plugin/assistant/'), "\n", ',', 'g').s:aType[a:fileType].'.dict.txt')
     endif
 
     if !has_key(s:aDict, s:aType[a:fileType])
         let s:aDict[s:aType[a:fileType]] = {}
         for line in readfile(s:aUrl[s:aType[a:fileType]])
-            let mList = matchlist(substitute(line, '\s*=\s*>\s*', '=>', ''), '^\(.\+\)=\s*>\(.\+\)$')
+            let mList = matchlist(line, '^\s*\([^ ]\+\)\s*=>\s*\(.\+\)$')
             if len(mList) >= 3
                 let s:aDict[s:aType[a:fileType]][mList[1]] = mList[2]
             endif
@@ -116,7 +116,7 @@ function s:Help()
 
     let results = []
     while len >= 0
-        if keys[len] ==? key || keys[len] =~? '^.\+:\{2}'.key.'$'
+        if keys[len] ==? key || keys[len] =~? '^.\+\.'.key.'$' || keys[len] =~? '^.\+:\{2}'.key.'$'
             call add(results, keys[len] . vals[len])
         endif
         let len -= 1
@@ -164,7 +164,7 @@ endf
 function s:SetCompletefunc()
     let type = s:GetFileType()
     if !has_key(s:aType, type)
-        if filereadable(expand(substitute(globpath(&rtp, 'plugin/assistant/'), "\n", ',', 'g').type.'.txt'))
+        if filereadable(expand(substitute(globpath(&rtp, 'plugin/assistant/'), "\n", ',', 'g').type.'.dict.txt'))
             let s:aType[type] = type
         endif
     endif

@@ -6,12 +6,14 @@ This is a mirror of http://www.vim.org/scripts/script.php?script_id=2805
 "      vim(zh_CN),
 "      f90(zh_CN),
 "      ...
+"   more in http://code.google.com/p/utility/downloads/list
 
-"   <C-h>快捷键显示当前位置函数的原型，支持PHP、Vim脚本
+"   <C-h>快捷键显示当前位置函数的原型，支持PHP、JS、Vim脚本
 "   <C-x-u>补全当前位置函数
 "   若喜欢用netbeans或者eclipse的补全快捷键，可以将=config=中的键映射启用。
 
 "   需要支持更多的文件类型，只要将符合 
    键=>值 
    形式的字典文件
-"   以 文件后缀名.txt 保存到 assistant 目录下即可，1.35版之后会自动载入。
+"   以 文件后缀名.dict.txt 保存到 assistant 目录下即可，1.35版之后会自动载入。
+"   更多的字典文件在 http://code.google.com/p/utility/downloads/list
