@@ -2,9 +2,9 @@
 "
 "          File:  assistant.vim
 "          Path:  ~/.vim/plugin
-"        Author:  A-yu
-"      Modifier:  A-yu
-"      Modified:  2012-05-03
+"        Author:  Alvan
+"      Modifier:  Alvan
+"      Modified:  2012-07-25
 "       License:  Public Domain
 "   Description:  1. Display the definition of functions, variables, etc.
 "                 2. Complete keywords(<C-x><C-u>).
@@ -15,7 +15,7 @@
 if exists("g:loaded_assistant")
     finish
 endif
-let g:loaded_assistant = "Version 1.5"
+let g:loaded_assistant = "Version 1.5.1"
 
 " ================================== Conf {{{ ==================================
 "
@@ -29,14 +29,10 @@ nmap <silent> <unique> <C-k> :call <SID>Help()<Cr>
 " imap <silent> <unique> <C-\> <C-x><C-u>
 " nmap <silent> <unique> <C-\> :call <SID>Help()<Cr>
 
-let s:aType = {
-            \'phps':'php', 'phtml':'php',
-            \'vimrc':'vim'
-            \}
-
 let s:aChar = '[a-zA-Z0-9_]'
 let s:aTags = '[f]'
 
+let s:aType = {}
 let s:aPath = {}
 let s:aDict = {}
 " ================================== }}} Conf ==================================
@@ -78,32 +74,33 @@ function! AutoCompFunc(start, base)
             return []
         endif
 
+        let blen = strlen(a:base)
+
         let tags = {}
-        let tlst = taglist(a:base)
+        let tlst = taglist('^'.a:base)
         let tlen = len(tlst) - 1
         while tlen >= 0
-            if tlst[tlen]['name'] =~ '^'.a:base.s:aChar.'*$'
-                let tags[tlst[tlen]['name']] = 1
-            endif
+            let tags[tlst[tlen]['name']] = 1
             let tlen -= 1
         endw
         unl tlst tlen
 
         let dlst = []
         let keys = keys(s:aDict[s:aType[fext]])
-        let vals = values(s:aDict[s:aType[fext]])
         let dlen = len(keys) - 1
         while dlen >= 0
-            if keys[dlen] =~ '^'.a:base.s:aChar.'*$'
+            if strpart(keys[dlen], 0, blen) == a:base
                 if has_key(tags, keys[dlen])
                     call remove(tags, keys[dlen])
                 endif
-
-                call add(dlst, {'word':keys[dlen], 'menu':vals[dlen]})
+                call add(dlst, {'word':keys[dlen], 'menu':s:aDict[s:aType[fext]][keys[dlen]]})
+            " elseif len(dlst) " dict file should be sorted first!!
+                " break
             endif
+
             let dlen -= 1
         endw
-        unl keys vals dlen
+        unl keys dlen
 
         return sort(keys(tags)) + sort(dlst)
     endif
@@ -112,7 +109,8 @@ endf
 
 " ================================== }}} Main ==================================
 function s:Fext()
-    return tolower((strridx(expand("%"),".") == -1) ? "" : strpart(expand("%"),(strridx(expand("%"),".") + 1)))
+    return &filetype
+    " return tolower((strridx(expand("%"),".") == -1) ? "" : strpart(expand("%"),(strridx(expand("%"),".") + 1)))
 endf
 
 function s:Init(fext)
@@ -157,7 +155,7 @@ function s:Help()
         let num -= 1
     endw
     if !exists("lcol")
-        echo 'assistant.ERR : The current contents of the cursor is not a keyword'
+        echo 'assistant.ERR : The current contents under the cursor is not a keyword'
         return
     endif
 
@@ -173,35 +171,28 @@ function s:Help()
     let key = strpart(str, lcol, rcol-lcol+1)
     let len = len(s:aDict[s:aType[fext]]) - 1
     let keys = keys(s:aDict[s:aType[fext]])
-    let vals = values(s:aDict[s:aType[fext]])
-
     let list = []
 
-    let tlst = taglist(key)
+    let tlst = taglist('^'.key.'$')
     let tlen = len(tlst) - 1
     while tlen >= 0
-        if tlst[tlen]['name'] == key && tlst[tlen]['kind'] =~ s:aTags
+        if tlst[tlen]['kind'] =~ s:aTags
             call add(list, tlst[tlen]['cmd'] . '    ' . pathshorten(tlst[tlen]['filename']))
         endif
         let tlen -= 1
     endw
 
     while len >= 0
-        if keys[len] == key || keys[len] =~ '^.\+\.'.key.'$' || keys[len] =~ '^.\+:\{2}'.key.'$'
-            call add(list, keys[len] . vals[len])
+        if keys[len] == key || keys[len] =~ '[\.:]'.key.'$'
+            call add(list, keys[len] . s:aDict[s:aType[fext]][keys[len]])
         endif
         let len -= 1
     endw
 
-    if len(list) > 0
-        echo join(sort(list), "\n")
-    else
-        echo 'assistant.MISS : Can not find the information on "'.key.'"'
-    endif
+    echo len(list) > 0 ? join(sort(list), "\n") : 'assistant.MISS : Can not find the information on "'.key.'"'
 endf
 
-autocmd BufEnter,BufRead * :call ASetCompFunc()
-autocmd Filetype * :call ASetCompFunc()
+autocmd Filetype,BufEnter,BufRead * :call ASetCompFunc()
 " ================================== }}} Main ==================================
 " vim:ft=vim:ff=unix:tabstop=4:shiftwidth=4:softtabstop=4:expandtab
 " End of file : assistant.vim
