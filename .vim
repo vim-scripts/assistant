@@ -4,7 +4,7 @@
 "          Path:  ~/.vim/plugin
 "        Author:  Alvan
 "      Modifier:  Alvan
-"      Modified:  2012-07-25
+"      Modified:  2012-11-18
 "       License:  Public Domain
 "   Description:  1. Display the definition of functions, variables, etc.
 "                 2. Complete keywords(<C-x><C-u>).
@@ -15,7 +15,7 @@
 if exists("g:loaded_assistant")
     finish
 endif
-let g:loaded_assistant = "Version 1.5.1"
+let g:loaded_assistant = "Version 1.5.2"
 
 " ================================== Conf {{{ ==================================
 "
@@ -124,12 +124,15 @@ function s:Init(fext)
 
     if !has_key(s:aDict, s:aType[a:fext])
         let s:aDict[s:aType[a:fext]] = {}
-        for line in readfile(s:aPath[s:aType[a:fext]])
-            let mList = matchlist(line, '^\s*\([^ ]\+\)\s*=>\s*\(.\+\)$')
-            if len(mList) >= 3
-                let s:aDict[s:aType[a:fext]][mList[1]] = mList[2]
-            endif
-        endfor
+
+        if filereadable(s:aPath[s:aType[a:fext]])
+            for line in readfile(s:aPath[s:aType[a:fext]])
+                let mList = matchlist(line, '^\s*\([^ ]\+\)\s*=>\s*\(.\+\)$')
+                if len(mList) >= 3
+                    let s:aDict[s:aType[a:fext]][mList[1]] = mList[2]
+                endif
+            endfor
+        endif
     endif
 
     return 1
